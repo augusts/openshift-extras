@@ -591,13 +591,19 @@ configure_quotas_on_node()
     echo 'Could not enable quotas for gear data: unable to determine mountpoint.'
   else
     # Enable user quotas for the device housing /var/lib/openshift.
-    sed -i -e "/^[^[:blank:]]\\+[[:blank:]]\\+${geardata_mnt////\/}/{/usrquota/! s/[[:blank:]]\\+/,usrquota&/4;}" /etc/fstab
+    sed -i -e "/^[^[:blank:]]\\+[[:blank:]]\\+${geardata_mnt////\/\\+[[:blank:]]}/{/usrquota/! s/[[:blank:]]\\+/,usrquota&/4;}" /etc/fstab
 
     # Remount to get quotas enabled immediately.
     mount -o remount "${geardata_mnt}"
 
     # Generate user quota info for the mount point.
     quotacheck -cmug "${geardata_mnt}"
+
+    # fix up selinux perms
+    restorecon "${geardata_mnt}"aquota.user
+
+    # (re)enable quotas
+    quotaon "${geardata_mnt}"
   fi
 }
 
