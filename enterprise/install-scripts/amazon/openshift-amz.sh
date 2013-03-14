@@ -1726,20 +1726,23 @@ set_defaults()
   # Grab the IP address set during installation.
   cur_ip_addr="$(/sbin/ip addr show dev eth0 | awk '/inet / { split($2,a,"/"); print a[1]; }')"
 
+  # if we are kickstarting we likely change our ip - cur_ip_addr is more a build ip and likely dhcp
+  static_ip_addr="${CONF_STATIC_IP_ADDR:-$cur_ip_addr}"
+
   # Unless otherwise specified, the broker is assumed to be the current
   # host.
-  broker_ip_addr="${CONF_BROKER_IP_ADDR:-$cur_ip_addr}"
+  broker_ip_addr="${CONF_BROKER_IP_ADDR:-$static_ip_addr}"
 
   # Unless otherwise specified, the node is assumed to be the current
   # host.
-  node_ip_addr="${CONF_NODE_IP_ADDR:-$cur_ip_addr}"
+  node_ip_addr="${CONF_NODE_IP_ADDR:-$static_ip_addr}"
 
   # Unless otherwise specified, the named service, data store, and
   # ActiveMQ service are assumed to be the current host if we are
   # installing the component now or the broker host otherwise.
   if named
   then
-    named_ip_addr="${CONF_NAMED_IP_ADDR:-$cur_ip_addr}"
+    named_ip_addr="${CONF_NAMED_IP_ADDR:-$static_ip_addr}"
   else
     named_ip_addr="${CONF_NAMED_IP_ADDR:-$broker_ip_addr}"
   fi
